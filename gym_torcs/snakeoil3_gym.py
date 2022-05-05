@@ -53,6 +53,7 @@
 # Try `snakeoil.py --help` to get started.
 
 # for Python3-based torcs python robot client
+import random
 import socket
 import sys
 import getopt
@@ -149,8 +150,7 @@ class Client():
         if t: self.trackname= t
         if s: self.stage= s
         if d: self.debug= d
-        #TODO DVO - HERE the track etc...pass it to the snakeOil client from torcs_env, from PPO?.. also the maxEpisodes, maxSteps
-        #   DECIDE whether --trackname arguments or pass it through the client 
+
         #Raceconfig compat
         self.torcs_process_id = process_id
         self.race_config_path = race_config_path
@@ -186,9 +186,8 @@ class Client():
             # This string establishes track sensor angles! You can customize them.
             #a= "-90 -75 -60 -45 -30 -20 -15 -10 -5 0 5 10 15 20 30 45 60 75 90"
             # xed- Going to try something a bit more aggressive...
-            a= "-45 -19 -12 -7 -4 -2.5 -1.7 -1 -.5 0 .5 1 1.7 2.5 4 7 12 19 45"
-            # a= "-19 -7 -2.5 0 2.5 7 19"                                             #DVO SENSORS
-            #TODO DVO - try less sensors, like 3 or 6
+            a= "-45 -19 -12 -7 -4 -2.5 -1.7 -1 -.5 0 .5 1 1.7 2.5 4 7 12 19 45"  #DVO sensors
+
             initmsg='%s(init %s)' % (self.sid,a)
 
             try:
@@ -299,7 +298,7 @@ class Client():
                     self.host= opt[1]
                 if opt[0] == '-i' or opt[0] == '--id':
                     self.sid= opt[1]
-                if opt[0] == '-t' or opt[0] == '--track':           #TODO DVO - check TRACK, EPISODES, STEPS & PORT?
+                if opt[0] == '-t' or opt[0] == '--track':
                     self.trackname= opt[1]
                 if opt[0] == '-s' or opt[0] == '--stage':
                     self.stage= int(opt[1])
@@ -343,7 +342,7 @@ class Client():
                 #         # (self.port,self.S.d['racePos'])))
                 
                 continue
-                #DVO - do not shutdown #ITS WEIRD, IDK WHY
+                #DVO - do not shutdown
                 # self.shutdown()
                 # return
             elif '***restart***' in sockdata:
@@ -351,7 +350,7 @@ class Client():
                 print("Server has restarted the race on %d." % self.port)
                 # I haven't actually caught the server doing this.
                 continue
-                #DVO - do not shutdown #ITS WEIRD, IDK WHY
+                #DVO - do not shutdown
                 # self.shutdown()
                 # return
             elif not sockdata: # Empty?
@@ -383,7 +382,7 @@ class Client():
         self.so = None
         # sys.exit() # No need for this really.
 
-#DVO can be used for .xml creation -> for further configuration of TORCS, obviously it does not take from command line args!....
+
     def randomise_track():
         # print( "### DEBUG: randomisation requested")
         # print( "### DEBUG: Profile Reuse Count", self.profile_reuse_count)
@@ -490,7 +489,7 @@ class ServerState():
             out+= "%s: %s\n" % (k,strout)
         return out
 
-    #DVO - check out sensors (distRaced)
+
     def fancyout(self):
         '''Specialty output for useful ServerState monitoring.'''
         out= str()

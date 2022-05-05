@@ -4,7 +4,7 @@
 ##   Bc. David Vosol                                        ##
 ##   VUT FIT 2021/2022                                      ##
 ##   Master's Thesis implementation                         ##
-##   ppo_cnn.py - PPO Implementation (sensors + cam)        ##
+##   ppo_old.py - complete PPO Implementation (snrs + cam)  ##
 ##   Based on https://github.com/higgsfield/RL-Adventure-2/ ##
 ##############################################################
 ##############################################################
@@ -13,7 +13,6 @@ import os
 import sys
 import logging
 import numpy as np
-# from vec_env import SubprocVecEnv
 import gym
 import gym_torcs
 import torch

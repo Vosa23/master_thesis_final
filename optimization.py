@@ -4,7 +4,7 @@
 ##   Bc. David Vosol (xvosol00)                             ##
 ##   VUT FIT 2021/2022                                      ##
 ##   Master's Thesis implementation                         ##
-##   optimization.py                                        ##
+##   optimization.py - Main optimization file - Gym loop    ##
 ##   Based on https://github.com/higgsfield/RL-Adventure-2/ ##
 ##############################################################
 ##############################################################
@@ -14,14 +14,9 @@ import sys
 import copy
 import logging
 import numpy as np
-# from vec_env import SubprocVecEnv
 import gym
 import gym_torcs
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.distributions import Normal
 import mlflow
 from mlflow import log_metric, log_param, log_artifact, start_run
 from datetime import datetime
@@ -81,9 +76,7 @@ def log_params(cfg, torcs=False):
         log_param('reward_function',    cfg['setup']['reward_function'])
         log_param('rendering',          cfg['setup']['rendering'])
 
-        # log_param('race_mode',          cfg['torcs']['race_mode'])
         log_param('normalize',          cfg['setup']['normalize'])
-        # log_param('opponents',          cfg['torcs']['opponents'])
         log_param('IMG_MODE',           cfg['ppo']['IMG_MODE'])
 
         log_param('comm_failure',       cfg['simulation']['comm_failure'])
@@ -109,7 +102,7 @@ def normalize(x):
 ############################ TESTING THE ENVIRONMENT #######################################################################
 
 def test_env_torcs( env, model, device, obs_vars, TEST_STEPS, track_length, model_cnn=None, CNN_TO_SENSORS=False,
-                    RECORD_SAMPLES=False, deterministic=False, render=False, eval=False):
+                    RECORD_SAMPLES=False, deterministic=False, RECORD_SAMPLES_PATH='record_samples_default.pth', eval=False):
     
     if isinstance(model, ConvNetActorCritic)  or CNN_TO_SENSORS or RECORD_SAMPLES:
         state, state_img = env.reset(relaunch=True)
@@ -151,18 +144,18 @@ def test_env_torcs( env, model, device, obs_vars, TEST_STEPS, track_length, mode
             print('TEST_lap_time:: ', lap_time.total_seconds())
             log_metric( 'TEST_lap_time', float(lap_time.total_seconds()))
 
-        #FOR NOW (PICKLE)
+        #ADD/REMOVE SENSORS YOU WANT
         if RECORD_SAMPLES:
-            state_pickle = obs_preprocess_fn(state, ['track'])              #['angle','track']   #ppo_04132022-13-34-40 has just TRACK
+            state_pickle = obs_preprocess_fn(state, ['angle','track','trackPos'])              #['angle','track']
             state_pickle = torch.FloatTensor(state_pickle).to(device)
 
         state = obs_preprocess_fn(state, obs_vars)
-        state = torch.FloatTensor(state).to(device)     #.unsqueeze(0)
+        state = torch.FloatTensor(state).to(device)
 
         if isinstance(model, ConvNetActorCritic):
             state_img = torch.FloatTensor(state_img).to(device)
 
-            #TODO save samples HERE.
+            #save samples
             if RECORD_SAMPLES:
                 imgs.append(state_img)
                 sensors.append(state_pickle)
@@ -180,17 +173,12 @@ def test_env_torcs( env, model, device, obs_vars, TEST_STEPS, track_length, mode
             dist, _ = model(state)
 
         if deterministic:
-            action = dist.mean.detach().cpu().numpy() #[0]  #TODO DVO TEST IT
+            action = dist.mean.detach().cpu().numpy()
         else:
-            action = dist.sample().cpu().numpy() #[0]
+            action = dist.sample().cpu().numpy()
         
-        print(dist.sample().cpu().numpy().shape)
-        print(dist.sample().cpu().numpy()[0].shape)
         print('Action in testing mode:: ', action)
-
-        # action = np.clip(action, a_min=-1., a_max=1.)
         action = np.squeeze(action)
-
 
         if isinstance(model, ConvNetActorCritic) or CNN_TO_SENSORS or RECORD_SAMPLES:
             (next_state, next_state_img), reward, done, _ = env.step(action)
@@ -220,7 +208,7 @@ def test_env_torcs( env, model, device, obs_vars, TEST_STEPS, track_length, mode
         samples['data'] = imgs
         samples['labels'] = sensors
         
-        with open('pickled_samples_ppo_04132022-13-34-40_etrack2_slow.pkl', 'ab') as fn: #appending
+        with open(RECORD_SAMPLES_PATH, 'ab') as fn: #appending
             pickle.dump(samples, fn, pickle.HIGHEST_PROTOCOL)
         print('PICKLES SAVED...')
 
@@ -232,6 +220,7 @@ def obs_preprocess_fn( dict_obs, obs_vars ):
     if not isinstance(dict_obs, dict):
         return dict_obs
 
+    print(dict_obs)
     vars_ = [v for (k,v) in dict_obs.items() if k in obs_vars]
     
     v = np.hstack([v for v in vars_])
@@ -253,6 +242,7 @@ def run(cfg, obs_vars, obs_preprocess):
     DETERM_ACTIONS      = cfg['setup']['determ_actions_test']
 
     RECORD_SAMPLES      = cfg['simulation']['record_samples']
+    RECORD_SAMPLES_PATH = cfg['simulation']['record_samples_path']
     NUM_TESTS           = cfg['ppo']['NUM_TESTS']
     NUM_ENVS            = cfg['ppo']['NUM_ENVS']
     NUM_LAYERS          = cfg['ppo']['NUM_OF_LAYERS']
@@ -297,14 +287,6 @@ def run(cfg, obs_vars, obs_preprocess):
             return env
         return _thunk
 
-
-
-    #TODO check parallel TORCS
-    # from cmd_util import make_torcs_env, torcs_arg_parser
-    # from baselines.common.vec_env.vec_frame_stack import VecFrameStack
-    #env = VecFrameStack(make_torcs_env( num_env, seed, vision=v, throttle=t, gear_change=g, race_config_path=r), 4)
-    
-
     
     # Autodetect CUDA
     cuda_avail = torch.cuda.is_available()
@@ -318,7 +300,7 @@ def run(cfg, obs_vars, obs_preprocess):
     # Prepare environments
     if cfg['ppo']['NUM_ENVS'] > 1:
         envs = [make_env(i) for i in range(NUM_ENVS)]
-        envs = SubprocVecEnv(envs)
+        envs = SubprocVecEnv(envs)  #Not further tested
         # env = gym.make(ENV_ID)
     else:
         envs = gym.make( "Torcs-v0", vision=cfg['setup']['vision'], rendering=cfg['setup']['rendering'],
@@ -327,15 +309,16 @@ def run(cfg, obs_vars, obs_preprocess):
                 obs_preprocess_fn=obs_preprocess, obs_normalization=cfg['setup']['normalize'], track_dict=track_dict,
                 config=cfg)
 
-
-    num_inputs  = envs.observation_space.shape[0] - 2  #distRaced, damage removed...
+    #distRaced, damage removed..as it is always on, so also during CNN_TO_SENSORS
+    num_inputs  = envs.observation_space.shape[0] - 2
     num_outputs = envs.action_space.shape[0]
     print('num_inputs:: ', num_inputs)
     print('num_outputs:: ', num_outputs)
 
-    #angle=1, track=19
+    #ADD/REMOVE SENSORS YOU WANT
+    #angle=1, track=19, trackPos=1      #used when RECORD_SAMPLES
     if CNN_TO_SENSORS:
-        num_inputs += 19
+        num_inputs += 21 #19, 20, 21
 
 
     #Loading trained model
@@ -365,7 +348,8 @@ def run(cfg, obs_vars, obs_preprocess):
 
             test_rewards = []
             for _ in range(NUM_TESTS):
-                test_reward = test_env_torcs(envs, model, device, obs_vars, TEST_STEPS, track_length, model_cnn, CNN_TO_SENSORS, RECORD_SAMPLES, deterministic=DETERM_ACTIONS, eval=True)
+                test_reward = test_env_torcs(envs, model, device, obs_vars, TEST_STEPS, track_length, model_cnn, CNN_TO_SENSORS, RECORD_SAMPLES,
+                                             deterministic=DETERM_ACTIONS, RECORD_SAMPLES_PATH=RECORD_SAMPLES_PATH, eval=True)
                 test_rewards.append(test_reward)
 
             test_mean = np.mean(test_rewards)
@@ -489,14 +473,14 @@ def run(cfg, obs_vars, obs_preprocess):
             if isinstance(model, ConvNetActorCritic): #or CNN_TO_SENSORS:
                 states_img.append(state_img)
             
-            #I know that i calculate also with time spend on training.. whatever ( dont wanna mess with sensors for now... But later I will)
+            
             curr_percent_of_track = np.round( ((dist_raced/track_length) * 100), 2)
             if curr_percent_of_track > 100 and not measured:
                 measured = True
                 time_end = datetime.now()
                 lap_time = time_end - time_start
                 print('lap_time:: ', lap_time.total_seconds())
-                log_metric( 'lap_time', float(lap_time.total_seconds()), frame_idx)         #okay maybe change to the GAME time...bcs I have it 16x speed....
+                log_metric( 'lap_time', float(lap_time.total_seconds()), frame_idx)
 
 
             print('reward:: ', reward)
@@ -535,7 +519,7 @@ def run(cfg, obs_vars, obs_preprocess):
 
         if percent_of_track > 100:
             mlflow.set_tag('one_lap_driven', 'yes')
-            # early_stop = True                           #For now - David
+            # early_stop = True                           #For now
 
         log_metric("total_reward",      float(total_reward),                    frame_idx)
         log_metric("percent_of_track",  float(percent_of_track),                frame_idx)
@@ -592,12 +576,6 @@ def run(cfg, obs_vars, obs_preprocess):
         if isinstance(model, ConvNetActorCritic): #or CNN_TO_SENSORS:
             states_img = torch.cat(states_img)
 
-        #TODO DVO - KL cutoff ?...
-        #TODO DVO - actions_with_noise
-        #other improvements....
-        #find correct size NN (ideally 2hidden and 128/256 neurons in each)
-        #STD_DEV decay maybe..
-        #vyzkouset Tanh znova...
 
 ##################################################################################################
 
@@ -615,10 +593,6 @@ def run(cfg, obs_vars, obs_preprocess):
         if train_epochs % TEST_EPOCHS == 0:
             print('TESTING OF TORCS ENV, episode:: ',train_epochs )
             
-            #here I can change the cfg property ( track name...so we can test on other track...)
-            # + then I can take stats from that...
-
-            #TODO DVO TEST IT
             if cfg['setup']['test_track'] is not None:
                 test_track_dict = copy.deepcopy(track_dict)
                 test_track_dict['name']  = cfg['setup']['test_track']
@@ -631,13 +605,10 @@ def run(cfg, obs_vars, obs_preprocess):
                                 obs_vars=obs_vars,reward_function_used=cfg['setup']['reward_function'],
                                 obs_normalization=cfg['setup']['normalize'], obs_preprocess_fn=obs_preprocess, track_dict=test_track_dict,
                                 rank=42, config=cfg) #obs_preprocess_fn=obs_preprocess
-            #maybe test it on different track? AND NOT deterministic actions?
-            test_reward = test_env_torcs(env, model, device, obs_vars, TEST_STEPS, track_length, model_cnn, CNN_TO_SENSORS, RECORD_SAMPLES, deterministic=DETERM_ACTIONS) #FOR NOW - PICKLE (record_samples = True)
-                                        #we use new env though, is it important?
-                                        # test_reward = np.mean([self.test_env(env, model, device) for _ in range(self.NUM_TESTS)])
+
+            test_reward = test_env_torcs(env, model, device, obs_vars, TEST_STEPS, track_length, model_cnn, CNN_TO_SENSORS, deterministic=DETERM_ACTIONS)
             env.end()
-            # else:
-            #     test_reward = test_env_torcs(envs, model, device, obs_vars, TEST_STEPS, track_length)
+
 
             print('Frame %s. reward: %s' % (frame_idx, test_reward))
             log_metric("TEST_reward", float(test_reward), frame_idx)

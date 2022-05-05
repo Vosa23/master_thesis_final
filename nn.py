@@ -3,28 +3,15 @@
 ##   Bc. David Vosol (xvosol00)                             ##
 ##   VUT FIT 2021/2022                                      ##
 ##   Master's Thesis implementation                         ##
-##   nn.py -                                                ##
-##   Based on                                               ##
+##   nn.py - Implementation of Actor-Critic networks        ##
+##                                                          ##
 ##############################################################
 ##############################################################
 
-import os
-import sys
-import logging
-import numpy as np
-# from vec_env import SubprocVecEnv
-import gym
-import gym_torcs
+
 import torch
 import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
 from torch.distributions import Normal
-import mlflow
-from mlflow import log_metric, log_param, log_artifact, start_run
-from datetime import datetime
-import pickle
-
 
 
 ############################ NEURAL NETWORK DEFINITION #######################################################################

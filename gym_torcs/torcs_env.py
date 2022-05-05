@@ -415,14 +415,14 @@ class TorcsEnv( gym.Env):
         reward = progress - 1.
 
         # COLLISION
-        if damage - damage_pred > 0.:                                
+        if damage - damage_pred > 0.:
             reward += -100.
-            terminate_episode = True
+            # terminate_episode = True
 
         terminate_episode = False
 
         # OUT OF TRACK
-        if (abs(track.any()) > 1 or abs(trackPos) > 1):             
+        if (abs(track.any()) > 1 or abs(trackPos) > 1):
             reward += -70.
             terminate_episode = True
 
@@ -430,7 +430,8 @@ class TorcsEnv( gym.Env):
         if self.terminal_judge_start < self.time_step:
             if progress < self.termination_limit_progress:
                 reward += -10.
-                # terminate_episode = True
+                if self.config['simulation']['mode'] == 'eval':
+                    terminate_episode = True            
 
         # GOES BACKWARDS
         if np.cos(angle) < 0.:
@@ -568,7 +569,7 @@ class TorcsEnv( gym.Env):
         self.torcs_process_id = subprocess.Popen( args, shell=False).pid
 
 
-    #DVO setting the action value for the server
+    #Setting the action value for the server
     def agent_to_torcs(self, u):
         torcs_action = {'steer': u[0]}
 
@@ -642,7 +643,7 @@ class TorcsEnv( gym.Env):
             else:
                 dict_obs[obs_name] = raw_obs[obs_name]
 
-        #USING CNN for img                                                                                          #TESTING - just sensors but in eval mode -> recording samples
+        #USING CNN for img
         if self.config['simulation']['architecture'] == 'cnn' or self.config['simulation']['cnn_to_sensors'] or self.config['simulation']['record_samples']:
             
             if self.config['simulation']['img_num'] == 2 or self.config['simulation']['img_type'] == 'diff':
