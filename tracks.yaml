@@ -1,0 +1,135 @@
+#tracks
+########################
+e-track-1:        #FAULTY - segfault
+  type:   road
+  length: 3243
+  width:  15
+  pits:   20
+
+eroad:
+  type:   road
+  length: 3260
+  width:  16
+  pits:   26
+
+forza:
+  type:   road
+  length: 5784
+  width:  11
+  pits:   16  
+
+g-track-2:
+  type:   road
+  length: 3185
+  width:  15
+  pits:   16
+
+g-track-3:
+  type:   road
+  length: 2843
+  width:  10
+  pits:   20
+
+e-track-2:
+  type:   road
+  length: 5380
+  width:  12
+  pits:   20
+
+e-track-3:
+  type:   road
+  length: 4208
+  width:  12
+  pits:   20
+
+e-track-4:
+  type:   road
+  length: 7041
+  width:  15
+  pits:   20  
+
+e-track-6:
+  type:   road
+  length: 4441
+  width:  13
+  pits:   20 
+
+
+michigan:
+  type:   oval
+  length: 2311
+  width:  18
+  pits:   16 
+
+
+#OTHER TRACKS NOT USED
+# aalborg
+# a-speedway
+# dirt
+# dirt-2
+# dirt-4
+# dirt-5
+# dirt-6
+# e-track-5
+# evo
+# g-track-1
+# mixed-1
+# mixed-2
+# oval
+# road
+# wheel-1
+
+# alpine-1
+# alpine-2
+# CVS
+# Makefile
+# ole-road-1
+# ruudskogen
+# spring
+# street-1
+# wheel-2
+
+
+
+# cars: /Desktop/rl/gym_torcs/vtorcs-RL-color/data/cars/models/
+##########################
+# 155-DTM
+# acura-nsx-sz
+# baja-bug
+# buggy
+# car1-trb1
+# car1-trb3
+# car2-trb1
+# car3-trb1
+# car4-trb1
+# car5-trb1
+# car6-trb1
+# car7-trb1
+# cg-nascar-rwd
+# kc-2000gt
+# kc-5300gt
+# kc-a110
+# kc-alfatz2
+# kc-bigh
+# kc-cobra
+# kc-coda
+# kc-conrero
+# kc-corvette-ttop
+# kc-daytona
+# kc-db4z
+# kc-dbs
+# kc-dino
+# kc-ghibli
+# kc-giulietta
+# kc-grifo
+# kc-gt40
+# kc-gto
+# kc-p4
+# p406
+# pw-206wrc
+# pw-306wrc
+# pw-corollawrc
+# pw-evoviwrc
+# pw-focuswrc
+# pw-imprezawrc
+# sc-f1
