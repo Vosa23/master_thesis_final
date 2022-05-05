@@ -30,9 +30,9 @@ class ConvNetActorCritic(nn.Module):
             self.conv2= nn.Conv2d(6, 16, 5)
 
             if img_num == 2:
-                self.fc2 = nn.Linear(1344, hidden_cnn)  #incorrect
+                self.fc2 = nn.Linear(1344, hidden_cnn)
             else:
-                self.fc2 = nn.Linear(576, hidden_cnn)  #576
+                self.fc2 = nn.Linear(576, hidden_cnn)
             self.fc3 = nn.Linear(hidden_cnn, out_cnn)
 
         elif self.type == 2:
@@ -43,7 +43,7 @@ class ConvNetActorCritic(nn.Module):
             self.conv2= nn.Conv2d(12, 24, 5, 1, 2)
 
             if img_num == 2:
-                self.fc2 = nn.Linear(1344, hidden_cnn)  #incorrect
+                self.fc2 = nn.Linear(3072, hidden_cnn)
             else:
                 self.fc2 = nn.Linear(1536, hidden_cnn)
             self.fc3 = nn.Linear(hidden_cnn, out_cnn)
@@ -54,10 +54,10 @@ class ConvNetActorCritic(nn.Module):
             self.conv11 = nn.Conv2d(24, 30, 5, 1, 2)
             self.pool4 = nn.AvgPool2d(4, 4)
             if img_num == 2:
-                self.fc2 = nn.Linear(3840, hidden_cnn)  #incorrect
+                self.fc2 = nn.Linear(3840, hidden_cnn)
             else:
                 self.fc2 = nn.Linear(1920, hidden_cnn)
-            self.fc3 = nn.Linear(hidden_cnn, out_cnn)            
+            self.fc3 = nn.Linear(hidden_cnn, out_cnn)
 
         elif self.type == 4:
             self.conv1 = nn.Conv2d(3, 6, 5, 1, 2)
@@ -67,7 +67,7 @@ class ConvNetActorCritic(nn.Module):
             self.conv2= nn.Conv2d(12, 18, 5, 1, 2)
             self.conv22= nn.Conv2d(18, 32, 5, 1, 2)
             if img_num == 2:
-                self.fc2 = nn.Linear(1024, hidden_cnn)  #FIXED
+                self.fc2 = nn.Linear(1024, hidden_cnn)
             else:
                 self.fc2 = nn.Linear(512, hidden_cnn)
             self.fc3 = nn.Linear(hidden_cnn, out_cnn)
@@ -79,7 +79,7 @@ class ConvNetActorCritic(nn.Module):
             self.pool4 = nn.AvgPool2d(4, 4)
 
             if img_num == 2:
-                self.fc2 = nn.Linear(1024, hidden_cnn)  #incorrect
+                self.fc2 = nn.Linear(1024, hidden_cnn)
             else:
                 self.fc2 = nn.Linear(512, hidden_cnn)
             self.fc3 = nn.Linear(hidden_cnn, out_cnn)
@@ -94,7 +94,7 @@ class ConvNetActorCritic(nn.Module):
             self.conv22= nn.Conv2d(48, 48, 5, 1, 2)
 
             if img_num == 2:
-                self.fc2 = nn.Linear(1536, hidden_cnn)  #incorrect
+                self.fc2 = nn.Linear(1536, hidden_cnn)
             else:
                 self.fc2 = nn.Linear(768, hidden_cnn)
             self.fc3 = nn.Linear(hidden_cnn, out_cnn)
@@ -108,7 +108,7 @@ class ConvNetActorCritic(nn.Module):
             self.conv2= nn.Conv2d(8, 8, 5, 1, 2)
 
             if img_num == 2:
-                self.fc2 = nn.Linear(1024, hidden_cnn)  #incorrect
+                self.fc2 = nn.Linear(1024, hidden_cnn)
             else:
                 self.fc2 = nn.Linear(512, hidden_cnn)
             self.fc3 = nn.Linear(hidden_cnn, out_cnn)

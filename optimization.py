@@ -220,7 +220,6 @@ def obs_preprocess_fn( dict_obs, obs_vars ):
     if not isinstance(dict_obs, dict):
         return dict_obs
 
-    print(dict_obs)
     vars_ = [v for (k,v) in dict_obs.items() if k in obs_vars]
     
     v = np.hstack([v for v in vars_])
