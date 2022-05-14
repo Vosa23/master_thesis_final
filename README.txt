@@ -113,6 +113,7 @@ All experiment related settings are located there.
 Also the speed of simulation, the track selection, loading of learned model, etc.
 To every option, there is a comment, explaining what each parameter does
 
+The complete source code of this work is located also at: https://github.com/Vosa23/master_thesis_final
 
 #Implementation files:
 
@@ -146,5 +147,5 @@ raceconfigs/michigan.xml
 gym_torcs/vtorcs-RL-color	- implementation and TORCS binaries
 checkpoints/				- trained agent models are saved there, also few sampled agents are located there, for all Regular, ConvNet and Hybrid architectures
 mlruns/						- statistics from individual runs are saved there
-libs/						- Plib and openAl libraries, they should be downloaded and installed through install_script automatically
+libs/						- Plib and openAl libraries, they should be downloaded and installed through install_script.sh automatically
 

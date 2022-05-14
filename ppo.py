@@ -3,7 +3,7 @@
 ##   Bc. David Vosol (xvosol00)                             ##
 ##   VUT FIT 2021/2022                                      ##
 ##   Master's Thesis implementation                         ##
-##   ppo.py                                                 ##
+##   ppo.py - Implementation of the PPO algorithm           ##
 ##   Based on https://github.com/higgsfield/RL-Adventure-2/ ##
 ##############################################################
 ##############################################################
