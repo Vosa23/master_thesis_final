@@ -29,7 +29,7 @@ from ppo import PPO
 
 log = logging.getLogger(__name__)
 
-
+#Function that logs source files into MlFlow
 def log_files(cfg):
     log_artifact(cfg['setup']['cfg_name'])
     log_artifact('./gym_torcs/torcs_env.py')
@@ -38,7 +38,7 @@ def log_files(cfg):
     log_artifact('nn.py')
     log_artifact('cnn.py')
 
-
+#Function that logs all parameters into MlFlow 
 def log_params(cfg, torcs=False):
     log_param('PPO_EPSILON',            cfg['ppo']['PPO_EPSILON'])
     log_param('PPO_EPOCHS',             cfg['ppo']['PPO_EPOCHS'])
@@ -100,7 +100,7 @@ def normalize(x):
     return x
 
 ############################ TESTING THE ENVIRONMENT #######################################################################
-
+#Function used for testing and evaluation of the agent
 def test_env_torcs( env, model, device, obs_vars, TEST_STEPS, track_length, model_cnn=None, CNN_TO_SENSORS=False,
                     RECORD_SAMPLES=False, deterministic=False, RECORD_SAMPLES_PATH='record_samples_default.pth', eval=False):
     
@@ -214,7 +214,7 @@ def test_env_torcs( env, model, device, obs_vars, TEST_STEPS, track_length, mode
 
     return total_reward
 
-
+#Function that preprocesses the sensory data for the Actor-critic network
 def obs_preprocess_fn( dict_obs, obs_vars ):
 
     if not isinstance(dict_obs, dict):
@@ -228,11 +228,14 @@ def obs_preprocess_fn( dict_obs, obs_vars ):
 
 
 ############################ SIMULATION CONTROL #######################################################################
+
+#Main function of the optimization algorithm
 def run(cfg, obs_vars, obs_preprocess):
 
     #Command line has to be emptied for correct startup of TORCS
     sys.argv = [sys.argv[0]]
 
+    #Loading the hyperparameters from config file
     ppo_version         = cfg['simulation']['algorithm']
     track_dict          = cfg['setup']['track_property']
     track_dict['name']  = cfg['setup']['track']
@@ -298,6 +301,7 @@ def run(cfg, obs_vars, obs_preprocess):
 
     # Prepare environments
     if cfg['ppo']['NUM_ENVS'] > 1:
+        pass
         envs = [make_env(i) for i in range(NUM_ENVS)]
         envs = SubprocVecEnv(envs)  #Not further tested
         # env = gym.make(ENV_ID)
@@ -332,7 +336,7 @@ def run(cfg, obs_vars, obs_preprocess):
         for p in model_cnn.parameters():
             p.requires_grad = False
     else:
-        model_cnn = None #not sure if necessary..
+        model_cnn = None
 
     if model_path is not None:
         model = torch.load(model_path)
@@ -414,6 +418,7 @@ def run(cfg, obs_vars, obs_preprocess):
                 time_start = datetime.now()
 
             if cfg['ppo']['NUM_ENVS'] > 1:
+                pass
                 for st in state:
                     damage = st.pop('damage', None)
                     dist_raced = st.pop('distRaced', None)
@@ -423,6 +428,7 @@ def run(cfg, obs_vars, obs_preprocess):
                 dist_raced = state.pop('distRaced', None)
                 speedX = state['speedX']*300
 
+            #Logging of each time-step into the terminal
             print('############# NEW STEP ################')
             print('total_frame_idx:: ', total_frame_idx)
             print('frame:: ',           frame_idx)
@@ -518,8 +524,9 @@ def run(cfg, obs_vars, obs_preprocess):
 
         if percent_of_track > 100:
             mlflow.set_tag('one_lap_driven', 'yes')
-            # early_stop = True                           #For now
-
+            # early_stop = True
+        
+        #Logging of metrics into the MlFlow
         log_metric("total_reward",      float(total_reward),                    frame_idx)
         log_metric("percent_of_track",  float(percent_of_track),                frame_idx)
         log_metric("dist_raced",        float(dist_raced),                      frame_idx)
@@ -531,6 +538,7 @@ def run(cfg, obs_vars, obs_preprocess):
         log_metric("time_elapsed",      float(time_elapsed.total_seconds()),    frame_idx)
         log_metric("total_frame_idx",   float(total_frame_idx),                 frame_idx)
 
+        #Printing the metrics values into terminal
         print('############# EPOCH SUMMARY ################')
         print('epoch:: ',               train_epochs)
         print('total_frame_idx:: ',     total_frame_idx)
@@ -588,7 +596,7 @@ def run(cfg, obs_vars, obs_preprocess):
         train_epochs += 1
 
 
-        #every 10 epochs
+        #every 10 epochs - testing
         if train_epochs % TEST_EPOCHS == 0:
             print('TESTING OF TORCS ENV, episode:: ',train_epochs )
             
@@ -598,12 +606,12 @@ def run(cfg, obs_vars, obs_preprocess):
             else:
                 test_track_dict = track_dict
             
-            # if cfg['ppo']['NUM_ENVS'] > 1:  #should we create new env for testing, when NUM_ENV > 1 ?
+            #Creating new Gym environment for the evaluation/testing 
             env = gym.make( "Torcs-v0", vision=cfg['setup']['vision'], rendering=cfg['setup']['rendering'],
                                 throttle=cfg['setup']['throttle'], race_speed=cfg['setup']['race_speed'],
                                 obs_vars=obs_vars,reward_function_used=cfg['setup']['reward_function'],
                                 obs_normalization=cfg['setup']['normalize'], obs_preprocess_fn=obs_preprocess, track_dict=test_track_dict,
-                                rank=42, config=cfg) #obs_preprocess_fn=obs_preprocess
+                                rank=42, config=cfg)
 
             test_reward = test_env_torcs(env, model, device, obs_vars, TEST_STEPS, track_length, model_cnn, CNN_TO_SENSORS, deterministic=DETERM_ACTIONS)
             env.end()
@@ -631,16 +639,12 @@ def run(cfg, obs_vars, obs_preprocess):
                 print("Best reward updated: %.3f -> %.3f" % (best_reward, test_reward))
                 name = "_best_%+.3f_%d.pth" % ( test_reward, frame_idx)
                 
+                #Saving here is not necessary, as we save it inside the MlFlow - so it is better organized (model at the same place as metrics for given exp)
                 # fname = os.path.join('.', 'checkpoints', log_time_name + str(time_elapsed.total_seconds()) + name)
                 # torch.save(model, fname)
+                # mlflow.pytorch.log_state_dict(model.state_dict(), artifact_path=name)
 
             ########################################################
-                # mlflow.pytorch.log_state_dict(model.state_dict(), artifact_path=name)
-                #VS
-                # scripted_pytorch_model = torch.jit.script(model)
-                # mlflow.pytorch.log_model(scripted_pytorch_model, "scripted_model")
-
-                #mlflow.pytorch.save_state_dict(state_dict, path, **kwargs)
 
             if EARLY_STOP:
                 if test_reward > TARGET_REWARD: early_stop = True

@@ -24,6 +24,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+#Class that runs the concrete implementation of PPO algorithm
 class Simulation:
 
     def __init__(self, cfg):
@@ -61,7 +62,7 @@ class Simulation:
 
 
 #CNN TO SENSORS OPTION - As the network was trained on Google Colab
-#                        model's definition has to be in a file with main function..
+#                        model's definition has to be in a file with main function.
 class CnnToSensors(nn.Module):
     def __init__(self):
         super(CnnToSensors, self).__init__()
@@ -87,6 +88,8 @@ class CnnToSensors(nn.Module):
 
         return x
 
+#CNN TO SENSORS OPTION - As the network was trained on Google Colab
+#                        model's definition has to be in a file with main function.
 class MyModel(nn.Module):
     def __init__(self):
         super().__init__()
@@ -113,6 +116,7 @@ class MyModel(nn.Module):
 
 #################################################################################################################################
 
+#Logging of the optimization
 logging.basicConfig(filename='logger.trc',
                     filemode='a',
                     format='%(asctime)s:%(msecs)-4d %(levelname)-6s %(message)-60s %(name)-13s %(funcName)-20s %(pathname)s',
@@ -122,6 +126,7 @@ logging.basicConfig(filename='logger.trc',
 
 log = logging.getLogger(__name__)
 
+#Function that parses the terminal input
 def parser( args ):
 
     if len(args) >= 2:
@@ -156,7 +161,7 @@ def parser( args ):
     else:
         return config
 
-
+#Main function of the program
 def main():
 
     config = parser(sys.argv)

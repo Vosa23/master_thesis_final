@@ -1,5 +1,15 @@
 #!/bin/bash
 
+##############################################################
+##############################################################
+##   Bc. David Vosol (xvosol00)                             ##
+##   VUT FIT 2021/2022                                      ##
+##   Master's Thesis implementation                         ##
+##   install_script.sh - Install of TORCS and Python env    ##
+##   Based on: https://github.com/dosssman/GymTorcs         ##
+##############################################################
+##############################################################
+
 # Installing System Dependencies
 # Distro check Helper
 if [ -f /etc/os-release ]; then
@@ -81,48 +91,50 @@ if [ "${OS}" == "CentOS Linux" ] ; then
   yum install -y mesa-libGL{,-devel} freealut{,-devel} libvorbis{,-devel} cmake3 libXrender{,-devel} libXrandr{,-devel} zlib{,-devel} libpng{,-devel}
 fi
 
-# Instaling Torcs itself
-echo "Installing Torcs"
+if [ "${OS}" != "Ubuntu" ] ; then
+  echo "Sorry, the installation of TORCS and Python environment is not supported by this script on your OS. Install manually via help in README.txt and source code of this script."
+fi
 
-#If PIP not on the machine:
-#sudo apt-get install python3-pip
+if [ "${OS}" == "Ubuntu" ] ; then
 
-#Python 3.6.9
-echo "Install packages"
+  # Instaling Torcs itself
+  echo "Installing Torcs"
 
-sudo pip3 install gdown
+  #If PIP not on the machine:
+  #sudo apt-get install python3-pip
 
-#Activating python environment and installation of libraries
-python3 -m venv venv/
-source ./venv/bin/activate
-pip install -r requirements.txt
+  #Python 3.6.9
+  echo "Install packages"
 
-cd gym_torcs
-echo $PWD
+  #Activating python environment and installation of libraries
+  python3 -m venv venv/
+  source ./venv/bin/activate
+  pip install -r requirements.txt
 
-#Downloading of TORCS binaries
-# https://drive.google.com/file/d/1WiWt5ln0D1BO_5-z0BaDXYFmqeaYuGQP/view?usp=sharing
-gdown --id 1WiWt5ln0D1BO_5-z0BaDXYFmqeaYuGQP
-tar -xvf vtorcs-RL-color.tar
-rm vtorcs-RL-color.tar
-rm -r vtorcs-RL-color/data/tracks/road/mlflow
+  cd gym_torcs
+  echo $PWD
 
-#Installation of TORCS
-cd vtorcs-RL-color
-./configure
+  #Downloading/Unpacking of TORCS binaries
+  # wget https://nextcloud.fit.vutbr.cz/s/sks5Aqiew8WRz8A/download/vtorcs-RL-color.tar
+  tar -xvf vtorcs-RL-color.tar
+  rm vtorcs-RL-color.tar
 
-sudo make
-sudo make install
-sudo make datainstall
-cd ../..
+  #Installation of TORCS
+  cd vtorcs-RL-color
+  ./configure
 
-echo "Install complete"
+  sudo make
+  sudo make install
+  sudo make datainstall
+  cd ../..
 
+  echo "Install complete"
 
-#Change of TORCS screen resolution:
-#/usr/local/share/games/torcs/config/screen.xml
-echo "Changing TORCS screen resolution to 64x64"
+  #Change of TORCS screen resolution:
+  #/usr/local/share/games/torcs/config/screen.xml
+  echo "Changing TORCS screen resolution to 64x64"
 
-sed -i "/name=\"x\"/ s/640/64/g" /usr/local/share/games/torcs/config/screen.xml
-sed -i "/name=\"y\"/ s/480/64/g" /usr/local/share/games/torcs/config/screen.xml
+  sed -i "/name=\"x\"/ s/640/64/g" /usr/local/share/games/torcs/config/screen.xml
+  sed -i "/name=\"y\"/ s/480/64/g" /usr/local/share/games/torcs/config/screen.xml
 
+fi

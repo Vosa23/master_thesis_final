@@ -16,6 +16,7 @@ from torch.distributions import Normal
 
 
 ############################ CONVOLUTIONAL NEURAL NETWORK DEFINITION ###############################################################
+#Class with 7 different CNN architectures
 class ConvNetActorCritic(nn.Module):
     def __init__(self, img_num, num_inputs, num_outputs, hidden_ac, hidden_cnn, out_cnn, cnn_type, std=0.0):
         super().__init__()

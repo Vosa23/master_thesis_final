@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#xvosol00 - Most of the file is original from Mr.Edwards, only small adjustments were done by us
 # snakeoil.py
 # Chris X Edwards <snakeoil@xed.ch>
 # Snake Oil is a Python library for interfacing with a TORCS

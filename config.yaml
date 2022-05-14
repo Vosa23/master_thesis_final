@@ -13,13 +13,13 @@ setup:
   cfg_name:             config.yaml                   # name of this file
   vision:               on                            # if the agent should use camera output (do not set off - this behavior is set by the architecture type <nn,cnn>)
   rendering:            on                            # do not set off!
-  throttle:             on                            # whether throttle control should be done by the agent (do not set off)
+  throttle:             on                            # whether throttle control should be controlled by the agent (do not set off)
   gear_shift:           off                           # not used during exps
   fuel:                 off                           # not used during exps
   noisy_sensors:        off                           # not used during exps
   race_speed:           4                             # <1,..100> - depending on the hardware 1-8 is suitable for CNN training, depending on the hardware
-  normalize:            on                            # Normalize sensor values to interval <0,1>
-  reward_function:      2                             # <1,..3>
+  normalize:            on                            # Normalize sensor values to interval <0,1> (always ON)
+  reward_function:      2                             # <1,..3> different reward functions, mainly used was 1 - "keep in centre" term, 2 - without "keep in centre" term, 3 - does not learn the agent
   track:                eroad                         # Track selection <eroad, e-track-2, forza, e-track-4, e-track-1, g-track-3, michigan, g-track-2> rest in tracks.yaml
   test_track:           e-track-2                     # Track selection - only for testing during optimization phase (regular learning) 
   determ_actions_test:  off                           # If the agent during testing chooses deterministic actions (mean) or just samples from the action distribution
@@ -27,10 +27,10 @@ setup:
 simulation:
   ENV_ID:                                             # alternative Gym environment, used before TORCS <BipedalWalker-v3, MountainCarContinuous-v0, RoboschoolHalfCheetah-v1, CarRacing-v0>
   algorithm:            ppo                           # <ppo, ppo_old>  where ppo_old is for older models
-  DEVICE:               CPU                           # <CUDA, CPU>
+  DEVICE:               CPU                           # <CUDA, CPU> - what hardware is used for the neural network optimization (PyTorch option)
 
-  mode:                 train                         #<train, eval>, when eval chosen, include load_model file path below
-  load_model:           #./checkpoints/nn_128_rwd2_snrs_eroad_beautiful.pth #nn_128_rwd2_snrs_eroad_beautiful_not_overfitt.pth.pth  # #nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/ppo_04132022-13-34-40.pth #./checkpoints/cnn_pickle.pth                #path of model to retrain (pretrained model)
+  mode:                 train                         #<train, eval>, when eval chosen, include load_model file path below, or if we continue training on already trained agent
+  load_model:                                         #path to the model (pretrained model) #./checkpoints/nn_128_rwd2_snrs_eroad_beautiful.pth #nn_128_rwd2_snrs_eroad_beautiful_not_overfitt.pth.pth  # #nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/ppo_04132022-13-34-40.pth #./checkpoints/cnn_pickle.pth
   race_config_path:     ./raceconfigs/default.xml     #race config for the Torcs - this is based on the track chosen. No need to change it here
   architecture:         nn                            # <cnn,nn>, cnn is used for camera input, nn for only sensory data
   img_num:              1                             # if architecture 'cnn' -> how many pics it uses <1,2>
@@ -38,7 +38,7 @@ simulation:
   cnn_type:             4                             # <1-7> Type of CNN network for image input            
   tracks_config:        ./tracks.yaml                 # config file with tracks info
   record_samples:       off                           # whether to record samples [image,sensors] for explicit CNN learning - to replace real sensor values
-  record_samples_path:  #'pickled_samples_nn_128_rwd2_snrs_eroad_beautiful0.pkl'
+  record_samples_path:                                # path for the dataset that will be created (for the CNN_TO_SENSORS ipynb cnn training ) #'pickled_samples_nn_128_rwd2_snrs_eroad_beautiful0.pkl'
 
   comm_delay:           off                           # simulation of network delay     #NOT USED
   comm_failure:         off                           # simulation of packet loss
@@ -54,29 +54,29 @@ simulation:
 ppo:
   #PPO Hyperparameters
   LEARN_RATE:           0.0001                        # learning rate of the Actor-Critic networks
-  GAMMA:                0.99
-  GAE_LAMBDA:           0.95
-  PPO_EPSILON:          0.2
-  CRITIC_DISCOUNT:      0.5
-  ENTROPY_BETA:         0.001
+  GAMMA:                0.99                          # used in the GAE estimation of returns, how much of an influence each time-step has
+  GAE_LAMBDA:           0.95                          # decay coefficient of the GAE exponentially weighed average of the returns
+  PPO_EPSILON:          0.2                           # how different the two policies can be (old and new one)
+  CRITIC_DISCOUNT:      0.5                           # the critic state-value discount coefficient
+  ENTROPY_BETA:         0.001                         # how much of an influence has the entropy bonus in the objective function
   MINI_BATCH_SIZE:      32                            # batch size has to be simular or smaller that PPO_STEPS (division by zero!)
-  PPO_EPOCHS:           20 #40 #20                    # PPO updates of parameters (from experience)
+  PPO_EPOCHS:           20                            # PPO updates of parameters (from experience)
 
   #Optimization Hyperparameters
   NUM_ENVS:             1                             # number of environments, NUM_ENV > 1 means parallelization NOT USED
   STD_DEV:              0.1                           # initial standard deviation of the action probability distribution (policy)
   NUM_OF_LAYERS:        2                             # <1,2> number of hidden layers
-  HIDDEN_SIZE_AC:       128                           # <64,128,256,512,..> number of neurons in hidden layer in AC network
+  HIDDEN_SIZE_AC:       512                           # <64,128,256,512,..> number of neurons in hidden layer in AC network
   HIDDEN_SIZE_CNN:      512                           # hidden linear layer in CNN network
   OUT_CNN:              120                           # out img features for AC network
   PPO_STEPS:            1600                          # steps in environment everytime done - DONE (masks out) #at best, it should be multiple of MINI_BATCH_SIZE
   TEST_EPOCHS:          5                             # how often put agent into the test for results..
   SAVE_EPOCHS:          20                            # currently it has to be divisible by TEST_EPOCHS bcs it is inside that IF
-  NUM_TESTS:            50   #10                      # how many tests will be done during EVAL phase in test_env_torcs with loaded_model
+  NUM_TESTS:            10                            # how many tests will be done during EVAL phase in test_env_torcs with loaded_model
   EARLY_STOP:           on                            # if ON, then simu ends by reaching TARGET_REWARD or TARGET_STEP, else by TOTAL_EPOCHS
   TARGET_REWARD:        250000                        # when earlyStop - end the training after TARGET_REWARD reached by the agent
   TARGET_STEP:          300000                        # when earlyStop - end the training after TARGET_STEP simulation steps
-  TOTAL_EPOCHS:         3000
+  TOTAL_EPOCHS:         3000                          # how many episodes/epochs the experiment will be long (does not depend on earlyStop)
   IMG_MODE:             rgb                           # gr1 - grayscale 1d (for linear NN), gr (64x64), rgb(64x64x3) NOT USED
   TEST_STEPS:           1600                          # max length of a testing episode (if not done)
 
@@ -85,12 +85,12 @@ sensors:
   speedX:               on       #USED DO NOT TURN OFF!
   speedY:               off      #USED
   speedZ:               off      #USED
-  angle:                off      #USED
+  angle:                on       #USED
   damage:               on       #USED for internal statistics only, DO NOT TURN OFF! 
   opponents:            off
   rpm:                  off      #USED
   track:                on       #USED   #when CNN_TO_SENSORS we have to TURN IT OFF
-  trackPos:             off      #USED
+  trackPos:             on       #USED
   wheelSpinVel:         off      #USED
   lap:                  off
   distRaced:            on       #USED for internal statistics only, DO NOT TURN OFF! 

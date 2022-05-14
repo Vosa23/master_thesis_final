@@ -27,6 +27,8 @@ log = logging.getLogger(__name__)
 
 DEF_BOX_DTYPE = np.float32
 
+#Class for TORCS environment which is registered inside the Gym library
+#The skeleton of this file is from dosssman GitHub, but 90% of the code is custom and written by us.
 class TorcsEnv( gym.Env):
 
     log.info('init TorcsEnv object')

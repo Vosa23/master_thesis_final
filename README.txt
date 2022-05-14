@@ -42,18 +42,19 @@ These common libraries should be installed before hand:
 
 mesa-utils libalut-dev libvorbis-dev cmake libxrender-dev libxrender1 libxrandr-dev zlib1g-dev libpng16-dev freeglut3 freeglut3-dev xvfb
 
-Just in case that the TORCS installation was not successfull: the TORCS depends on the plib-1.8.5 and openal-soft-1.17.2 library
+Just in case that the TORCS installation was not successfull: the TORCS depends on the plib-1.8.5 and openal-soft-1.17.2 library located in libs/
 Its installation procedure can be followed in the install_script.sh file.
 
+#All files are located on the SD-card, including the TORCS Binaries
 
 #Manual download of TORCS binaries:
-Download from link: https://drive.google.com/file/d/1WiWt5ln0D1BO_5-z0BaDXYFmqeaYuGQP/view?usp=sharing
+Download from link: https://nextcloud.fit.vutbr.cz/s/sks5Aqiew8WRz8A/download/vtorcs-RL-color.tar
 
-Or use gdown utility:
-	sudo pip install gdown
+Or download using wget:
 	cd gym_torcs
-	gdown --id 1WiWt5ln0D1BO_5-z0BaDXYFmqeaYuGQP
+	wget https://nextcloud.fit.vutbr.cz/s/sks5Aqiew8WRz8A/download/vtorcs-RL-color.tar
 	tar -xvf vtorcs-RL-color.tar
+	rm vtorcs-RL-color.tar
 
 
 #Manual installation of TORCS:
@@ -110,21 +111,21 @@ To run the MlFlow web service, it is required to run the command in separate ter
 The file is config.yaml located in root directory
 All experiment related settings are located there.
 Also the speed of simulation, the track selection, loading of learned model, etc.
-To every option there is a comment, explaining what each parameter does
+To every option, there is a comment, explaining what each parameter does
 
 
 #Implementation files:
 
-run.py				- from where the implementation is started
-optimization.py			- the main optimization loop
-nn.py				- implementation of feed forward neural networks
-cnn.py				- implementation of convolutional neural networks
-ppo.py				- implementation of the PPO algorithm
-ppo_cnn.py			- for older learned agent models, all previous files merged into one
-config.yaml			- main configuration file for experiment setup
-tracks.yaml			- configuration of available race tracks
+run.py						- from where the implementation is started
+optimization.py				- the main optimization loop
+nn.py						- implementation of feed forward neural networks
+cnn.py						- implementation of convolutional neural networks
+ppo.py						- implementation of the PPO algorithm
+ppo_old.py					- for older learned agent models, all previous files merged into one
+config.yaml					- main configuration file for experiment setup
+tracks.yaml					- configuration of available race tracks
 CNN_model_for_sensors.ipynb	- python notebook for CNN training (Hybrid architecture - camera to sensors prediction)
-gym_torcs/__init__		- necessary file for registration of the custom Gym TORCS environment
+gym_torcs/__init__			- necessary file for registration of the custom Gym TORCS environment
 gym_torcs/snakeoil3_gym.py	- client for UDP communication with the TORCS server
 gym_torcs/torcs_env.py		- Gym wrapper over the SnakeOil client
 
@@ -143,7 +144,7 @@ raceconfigs/michigan.xml
 
 #TORCS server files:
 gym_torcs/vtorcs-RL-color	- implementation and TORCS binaries
-checkpoints/			- trained agent models are saved there
-mlruns/				- statistics from individual runs are saved there
-
+checkpoints/				- trained agent models are saved there, also few sampled agents are located there, for all Regular, ConvNet and Hybrid architectures
+mlruns/						- statistics from individual runs are saved there
+libs/						- Plib and openAl libraries, they should be downloaded and installed through install_script automatically
 

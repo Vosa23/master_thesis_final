@@ -15,6 +15,7 @@ from torch.distributions import Normal
 
 
 ############################ NEURAL NETWORK DEFINITION #######################################################################
+#Class with Actor-Critic network architecture
 class ActorCritic(nn.Module):
     def __init__(self, num_inputs, num_outputs, hidden_size, num_layers, std=0.0):
         super().__init__()
