@@ -13,7 +13,7 @@ import logging
 import numpy as np
 import torch
 import torch.optim as optim
-from mlflow import log_metric, log_param, log_artifact, start_run
+from mlflow import log_metric
 
 
 #################################################################################################################################
@@ -21,7 +21,7 @@ from mlflow import log_metric, log_param, log_artifact, start_run
 log = logging.getLogger(__name__)
 
 ############################ PROXIMAL POLICY OPTIMIZATION #######################################################################
-
+#Class for the PPO algorithm, update loop and GAE estimation
 class PPO():
 
     def __init__(self, cfg, model ):
@@ -40,11 +40,7 @@ class PPO():
         self.optimizer = optim.Adam(model.parameters(), lr=self.LEARN_RATE)
         self.model = model
 
-        # params = [p for p in model.parameters() if p.requires_grad]
-        # optimizer = torch.optim.SGD(params, lr=0.005,
-        #                         momentum=0.9, weight_decay=0.0005)
-
-
+    #Generalized advantage estimation
     def compute_gae(self, next_value, rewards, masks, values):
         log.info('PPO GAE')
         values = values + [next_value]
@@ -57,7 +53,7 @@ class PPO():
             returns.insert(0, gae + values[step])
         return returns
 
-
+    #Generates batch from an episode for the PPO update
     def ppo_iter(self, states, actions, log_probs, returns, advantage, states_img): #=None
         log.info('PPO iter')
         batch_size = states.size(0)
@@ -71,7 +67,7 @@ class PPO():
             else:
                 yield states[rand_ids, :], actions[rand_ids, :], log_probs[rand_ids, :], returns[rand_ids, :], advantage[rand_ids, :], states_img[rand_ids, :]
             
-
+    #Main update loop of the PPO, includes the objective function
     def ppo_update(self, states, actions, log_probs, returns, advantages, frame_idx, states_img=None):
         log.info('PPO update started')
         count_steps =     0
@@ -116,7 +112,8 @@ class PPO():
                 sum_entropy += entropy
 
                 count_steps += 1
-
+        
+        #Logging the metrics of the optimization into MlFlow
         log_metric("returns", float(sum_returns / count_steps), frame_idx)
         log_metric("advantage", float(sum_advantage / count_steps), frame_idx)
         log_metric("loss_actor", float(sum_loss_actor / count_steps), frame_idx)
