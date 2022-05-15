@@ -30,7 +30,7 @@ simulation:
   DEVICE:               CPU                           # <CUDA, CPU> - what hardware is used for the neural network optimization (PyTorch option)
 
   mode:                 eval                          # <train, eval>, when eval chosen, include load_model file path below, or if we continue training on already trained agent
-  load_model:           ./checkpoints/nn_128_rwd2_snrs_eroad.pth #path to the model (pretrained model) #./checkpoints/nn_128_rwd2_snrs_eroad_beautiful.pth #nn_128_rwd2_snrs_eroad_beautiful_not_overfitt.pth.pth  # #nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/ppo_04132022-13-34-40.pth #./checkpoints/cnn_pickle.pth
+  load_model:           ./checkpoints/nn_128_rwd2_snrs_eroad.pth #path to the model (pretrained model) #./checkpoints/nn_128_rwd2_snrs_eroad_not_overfitted.pth                                                   # #nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/ppo_04132022-13-34-40.pth #./checkpoints/cnn_pickle.pth
   race_config_path:     ./raceconfigs/default.xml     # race config for the Torcs - this is based on the track chosen. No need to change it here
   architecture:         nn                            # <cnn,nn>, cnn is used for camera input, nn for only sensory data
   img_num:              1                             # if architecture 'cnn' -> how many pics it uses <1,2>
@@ -38,7 +38,7 @@ simulation:
   cnn_type:             4                             # <1-7> Type of CNN network for image input            
   tracks_config:        ./tracks.yaml                 # config file with tracks info
   record_samples:       off                           # whether to record samples [image,sensors] for explicit CNN learning - to replace real sensor values
-  record_samples_path:                                # path for the dataset that will be created (for the CNN_TO_SENSORS ipynb cnn training ) #'pickled_samples_nn_128_rwd2_snrs_eroad_beautiful0.pkl'
+  record_samples_path:                                # path for the dataset that will be created (for the CNN_TO_SENSORS ipynb cnn training ) #'pickled_samples_nn_128_rwd2_snrs_eroad.pkl'
 
   comm_delay:           off                           # simulation of network delay     #NOT USED
   comm_failure:         off                           # simulation of packet loss
