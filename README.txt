@@ -34,6 +34,9 @@ Also camera can be used only when we are directly on the Linux machine, unfortun
 	source ./venv/bin/activate
 	python3 run.py -c config.yaml
 
+config.yaml 				- runs the optimization of a new untrained agent
+config_learned.yaml 		- runs the evaluation of a pretrained agent
+config_cnn_to_sensors.yaml 	- runs the evaluation of a Hybrid architecture (prediction of sensors from camera to an agent trained on sensors)
 ################################################################
 
 #Complete Installation: (in case of problems, Ubuntu version)
@@ -124,6 +127,8 @@ cnn.py						- implementation of convolutional neural networks
 ppo.py						- implementation of the PPO algorithm
 ppo_old.py					- for older learned agent models, all previous files merged into one
 config.yaml					- main configuration file for experiment setup
+config_learned.yaml			- configuration file for evaluation Regular arch. (prepared for you)
+config_cnn_to_sensors.yaml	- configuration file for evaluation Hybrid arch. (prepared for you)
 tracks.yaml					- configuration of available race tracks
 CNN_model_for_sensors.ipynb	- python notebook for CNN training (Hybrid architecture - camera to sensors prediction)
 gym_torcs/__init__			- necessary file for registration of the custom Gym TORCS environment

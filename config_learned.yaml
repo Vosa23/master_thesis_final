@@ -4,13 +4,13 @@
 ##   Bc. David Vosol (xvosol00)                             ##
 ##   VUT FIT 2021/2022                                      ##
 ##   Master's Thesis implementation                         ##
-##   config.yaml - Main configuration file                  ##
+##   config_learned.yaml - Config file - eval Regular arch. ##
 ##                                                          ##
 ##############################################################
 ##############################################################
 
 setup:
-  cfg_name:             config.yaml                   # name of this file
+  cfg_name:             config_learned.yaml           # name of this file
   vision:               on                            # if the agent should use camera output (do not set off - this behavior is set by the architecture type <nn,cnn>)
   rendering:            on                            # do not set off!
   throttle:             on                            # whether throttle control should be controlled by the agent (do not set off)
@@ -29,8 +29,8 @@ simulation:
   algorithm:            ppo                           # <ppo, ppo_old>  where ppo_old is for older models
   DEVICE:               CPU                           # <CUDA, CPU> - what hardware is used for the neural network optimization (PyTorch option)
 
-  mode:                 train                         # <train, eval>, when eval chosen, include load_model file path below, or if we continue training on already trained agent
-  load_model:                                         # path to the model (pretrained model) #./checkpoints/nn_128_rwd2_snrs_eroad.pth
+  mode:                 eval                          # <train, eval>, when eval chosen, include load_model file path below, or if we continue training on already trained agent
+  load_model:           ./checkpoints/nn_128_rwd2_snrs_eroad.pth #path to the model (pretrained model) #./checkpoints/nn_128_rwd2_snrs_eroad_beautiful.pth #nn_128_rwd2_snrs_eroad_beautiful_not_overfitt.pth.pth  # #nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/nn_cloud_0.05_cont.pth #./checkpoints/e_track2_nn_new_reward-well_trained.pth #./checkpoints/ppo_04132022-13-34-40.pth #./checkpoints/cnn_pickle.pth
   race_config_path:     ./raceconfigs/default.xml     # race config for the Torcs - this is based on the track chosen. No need to change it here
   architecture:         nn                            # <cnn,nn>, cnn is used for camera input, nn for only sensory data
   img_num:              1                             # if architecture 'cnn' -> how many pics it uses <1,2>
@@ -49,7 +49,7 @@ simulation:
 
   #If trained CNN model from recorded samples (IMG->sensors) <angle,track> (20 values)
   cnn_to_sensors:       off                           # architecture=cnn, img_type=reg, img_num=1, if ON, make sure to include file path to cnn_to_sensors_path below (learned CNN model)
-  cnn_to_sensors_path:                                # path to pretrained CNN model for Hybrid achr. ./checkpoints/model_cnn_to_sensors-eroad_fin2.pth
+  cnn_to_sensors_path:                                # ./checkpoints/model_cnn_to_sensors-eroad_fin2.pth
 
 ppo:
   #PPO Hyperparameters
@@ -66,13 +66,13 @@ ppo:
   NUM_ENVS:             1                             # number of environments, NUM_ENV > 1 means parallelization NOT USED
   STD_DEV:              0.1                           # initial standard deviation of the action probability distribution (policy)
   NUM_OF_LAYERS:        2                             # <1,2> number of hidden layers
-  HIDDEN_SIZE_AC:       512                           # <64,128,256,512,..> number of neurons in hidden layer in AC network
+  HIDDEN_SIZE_AC:       128                           # <64,128,256,512,..> number of neurons in hidden layer in AC network
   HIDDEN_SIZE_CNN:      512                           # hidden linear layer in CNN network
   OUT_CNN:              120                           # out img features for AC network
   PPO_STEPS:            1600                          # steps in environment everytime done - DONE (masks out) #at best, it should be multiple of MINI_BATCH_SIZE
   TEST_EPOCHS:          5                             # how often put agent into the test for results..
   SAVE_EPOCHS:          20                            # currently it has to be divisible by TEST_EPOCHS bcs it is inside that IF
-  NUM_TESTS:            10                            # how many tests will be done during EVAL phase in test_env_torcs with loaded_model
+  NUM_TESTS:            50                            # how many tests will be done during EVAL phase in test_env_torcs with loaded_model
   EARLY_STOP:           on                            # if ON, then simu ends by reaching TARGET_REWARD or TARGET_STEP, else by TOTAL_EPOCHS
   TARGET_REWARD:        250000                        # when earlyStop - end the training after TARGET_REWARD reached by the agent
   TARGET_STEP:          300000                        # when earlyStop - end the training after TARGET_STEP simulation steps
